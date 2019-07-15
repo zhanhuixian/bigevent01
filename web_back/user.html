@@ -98,9 +98,7 @@
                 e.preventDefault();
                 var urlo = URL.createObjectURL(this.files[0]);
                 $(".user_pic").attr("src", urlo);
-                $(".ii").html("已选定")
-
-
+                $(".ii").html("已选定");
             })
             $.ajax({
                 type: "get",
