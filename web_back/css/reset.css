@@ -16,7 +16,9 @@ a:link,a:visited,a:hover,a:active{
     text-decoration:none; 
 }
 
-
+.pagination{
+    cursor:pointer;
+}
 ul{
     list-style:none;
 }
