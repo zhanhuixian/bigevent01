@@ -15,6 +15,8 @@
     <script src="js/jedate/js/jedate.js"></script>
     <script src="js/tinymce/js/tinymce/tinymce.min.js"></script>
     <script src="js/tinymce/js/tinymce_setup.js"></script>
+    <script src="./js/template-web.js"></script>
+    <script src="./js/moment.js"></script>
 </head>
 
 <body>
@@ -27,19 +29,20 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章标题：</label>
                     <div class="col-sm-10">
-                        <input type="email" class="form-control" id="inputEmail3" placeholder="文章标题">
+                        <input type="email" class="form-control" id="inputEmail3" name="title" placeholder="文章标题">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
-                        <input type="file" id="exampleInputFile">
+                        <img src="./images/2.jpg" height="100" alt="">
+                        <input type="file" id="exampleInputFile" name="cover">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control">
+                        <select class="form-control form_release" name="type">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -53,7 +56,7 @@
                     <div class="col-sm-4">
 
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="YYYY-MM-DD" id="dateinput">
+                            <input type="text" class="form-control form-date" placeholder="YYYY-MM-DD" id="dateinput">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"
                                     onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
@@ -72,13 +75,71 @@
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success">发布</button>
+                        <button type="submit" class="btn btn-success" id="art_release">发布</button>
                         <button type="submit" class="btn btn-default">存为草稿</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    <script id="art_release1" type="text/html">
+        {{each data v}}
+
+        <option value={{v.id}}>{{v.name}}</option>
+
+        {{/each}}
+    </script>
+    <script>
+        $(function () {
+            //实现图片预览
+            $("#exampleInputFile").on("change", function (e) {
+                e.preventDefault();
+                var url = URL.createObjectURL(this.files[0]);
+                $(this).prev().attr("src", url);
+
+            })
+            //实现文章类别下拉菜单
+            $.ajax({
+                url: "http://localhost:8000/admin/category_search ",
+                success: function (backData) {
+
+                    if (backData.code == 200) {
+                        var reshtml = template("art_release1", backData);
+                        $(".form_release").html(reshtml);
+                    }
+                }
+            })
+            //实现一打开页面就显示当下日期：
+
+            var res = moment().format("YYYY-MM-DD");
+            //获取富文本内容
+            $(".form-date").val(res);
+
+            // 实现发布功能--
+            $("#art_release").click(function (e) {
+                e.preventDefault();
+                //1.获取发布里面的信息；
+                var res = new FormData($(".article_form")[0]);
+                res.append("content",tinyMCE.activeEditor.getContent() );
+                res.append("state", "草稿");
+                $.ajax({
+                    url:"http://localhost:8000/admin/article_publish ",
+                    type:"post",
+                    data:res,
+                    contentType:false,
+                    processData:false,
+                    success:function(backData){
+                        if(backData.code==201){
+                            alert("发布成功")
+                        }
+                    }
+                })
+            })
+
+
+
+        })
+    </script>
 
 </body>
 
