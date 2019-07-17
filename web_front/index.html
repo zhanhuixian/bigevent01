@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link rel="stylesheet" href="css/main.css">
+    <script src="./js/jquery-1.12.4.min.js"></script>
+    <script src="./js/template-web.js"></script>
 </head>
 
 <body>
@@ -170,11 +172,11 @@
                         <b><em>丽丽</em> 9个月前(08-14)说:9个月前(08-14)说:9个月前(08-14)说:</b>
                         <strong>挺会玩的挺会玩的挺会玩的挺会玩的</strong>
                     </li>
-                    <li>
+                    <b>
                         <span>R</span>
                         <b><em>Rechael</em> 9个月前(08-14)说:</b>
                         <strong>挺会玩的</strong>
-                    </li>
+                    </b>
                     <li>
                         <span>J</span>
                         <b><em>John</em> 9个月前(08-14)说:</b>
@@ -220,6 +222,42 @@
         <p>CopyRight © 2019 深圳大事件信息技术股份有限公司   All Rights Reserved</p>
         <p>电话：0755-****888    粤ICP备*******8号</p>
     </div>
+    <script id="head_title" type=text/html>
+        {{each data v}}
+        {{if $index==0}}
+        <li class="first">
+            {{else}}
+        <li>    
+        {{/if}}
+                <a href="article.html?id={{v.id}}"><img src="{{v.cover}}" alt=""></a>
+                <p>{{v.title}}</p>
+         </li>
+
+        {{/each}}
+    
+    </script>
+    <script>
+       $(function(){
+           //实现一打开网页显示最新的5条文章
+           $.ajax({
+               url:"http://localhost:8000/admin/search",
+               data:{
+                   page:1,
+                   perpage:5
+               },
+            success:function(backData){
+                if(backData.code==200){
+                    var  res=template("head_title",backData);
+                    $(".focus_list").html(res);
+                }
+
+            }
+               
+           })
+       })
+    
+    
+    </script>
 
 </body>
 
