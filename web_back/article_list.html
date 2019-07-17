@@ -14,7 +14,7 @@
     <script src="./js/template-web.js"></script>
     <script src="./js/jquery.twbsPagination.min.js"></script>
 </head>
-    
+
 
 <body>
     <div class="container-fluid">
@@ -58,8 +58,6 @@
                 </thead>
                 <tbody>
 
-
-
                     <tr>
 
                         <td>王积千造统最头</td>
@@ -73,7 +71,7 @@
 
                         <td class="text-center">
                             <a href="article_edit.html" class="btn btn-default btn-xs">编辑</a>
-                            <a href="javascript:deleteTr( 1005 );" class="btn btn-danger btn-xs">删除</a>
+                            <a href="#"  class="btn btn-danger btn-xs art_delete">删除</a>
                         </td>
                     </tr>
 
@@ -273,7 +271,7 @@
     <script id="art_list" type="text/html">
         <option value="">所有分类</option>
         {{each data v}}
-        <option vale={{v.id}}>{{v.name}}</option>
+        <option value={{v.id}}>{{v.name}}</option>
 
         {{/each}}
     </script>
@@ -290,8 +288,8 @@
 
 
             <td class="text-center">
-                <a href="post-edit.html?id=995" class="btn btn-default btn-xs">编辑</a>
-                <a href="#" data-id={{v.id}} class="btn btn-danger btn-xs">删除</a>
+                <a href="article_edit.html?id={{v.id}}" class="btn btn-default btn-xs">编辑</a>
+                <a href="#" data-id={{v.id}} class="btn btn-danger btn-xs art_delete">删除</a>
             </td>
         </tr>
 
@@ -306,89 +304,114 @@
 
 
         $(function () {
-            //展示文章所有类别
+                    //展示文章所有类别
 
-            $.ajax({
-                url: "http://localhost:8000/admin/category_search",
-                success: function (backData) {
-                    if (backData.code == 200) {
-                        var res = template("art_list", backData);
-                        $("#selCategory").html(res);
+                    $.ajax({
+                        url: "http://localhost:8000/admin/category_search",
+                        success: function (backData) {
+                            if (backData.code == 200) {
+                                var res = template("art_list", backData);
+                                $("#selCategory").html(res);
 
-                    }
-                }
-            })
-           
-
-
-            //筛选出文章
-            $(".btn-search").click(function (e) {
-                e.preventDefault();
-            function getData(mypage){
-                var cat = $("#selCategory").val();
-
-                var sel = $("#selStatus").val();
-
-                $.ajax({
-                    url: 'http://localhost:8000/admin/search',
-                    data: {
-                        type: cat,
-                        state: sel,
-                        page: mypage,
-                        perpage: 5
-                    },
-                    success: function (backData) {
-                        console.log(backData);
-                        if (backData.code == 200) {
-                            //调用模板引擎的核心方法.
-                            var resHtml = template('art_show', backData);
-                            $('tbody').html(resHtml);
-                            if (myTotalPage != totalPages) {//如果现在获取的新的页码数,不等于当前的总的页码数,那就要重绘.
-                                myTotalPage = totalPages; //把获取的新的总的页数,赋值给我们声明的变量(代表总页数)
-                                
-                                var currentPage = $pagination.twbsPagination(
-                                'getCurrentPage'); //获取当前页
-
-                                $pagination.twbsPagination('destroy');
-                                $pagination.twbsPagination($.extend({}, defaultOpts, {
-                                    startPage: 1,
-                                    totalPages: totalPages
-                                }));
                             }
+                        }
+                    })
 
 
+
+                    //筛选出文章
+                    $(".btn-search").click(function (e) {
+                        e.preventDefault();
+
+                        function getData(mypage) {
+                            var cat = $("#selCategory").val();
+
+                            var sel = $("#selStatus").val();
+
+                            $.ajax({
+                                url: 'http://localhost:8000/admin/search',
+                                data: {
+                                    type: cat,
+                                    state: sel,
+                                    page: mypage,
+                                    perpage: 5
+                                },
+                                success: function (backData) {
+                                    console.log(backData);
+                                    if (backData.code == 200) {
+                                        //调用模板引擎的核心方法.
+                                        var resHtml = template('art_show', backData);
+                                        $('tbody').html(resHtml);
+                                        // if (myTotalPage !=
+                                        //     totalPages) { //如果现在获取的新的页码数,不等于当前的总的页码数,那就要重绘.
+                                        //     myTotalPage = totalPages; //把获取的新的总的页数,赋值给我们声明的变量(代表总页数)
+
+                                        //     var currentPage = $pagination.twbsPagination(
+                                        //         'getCurrentPage'); //获取当前页
+
+                                        //     $pagination.twbsPagination('destroy');
+                                        //     $pagination.twbsPagination($.extend({}, defaultOpts, {
+                                        //         startPage: 1,
+                                        //         totalPages: totalPages
+                                        //     }));
+                                        // }
+
+
+
+
+                                    }
+                                }
+                            })
 
 
                         }
+
+                        getData(1);
+                        $('.pagination').twbsPagination({
+                            totalPages: 25, //最大的页签数
+                            visiblePages: 5, //可见的页签数
+                            first: '首页',
+                            last: '尾页',
+                            prev: "上一页",
+                            next: "下一页",
+                            onPageClick: function (event, page) { //点击页签回调函数.
+                                //console.log(event);//点击时候触发的事件对象
+                                //console.log(page); //点击的页码
+                                //调用getData();
+                                getData(page);
+                            }
+                        });
+
+
+                    })
+                    
+                    //实现一进页面就显示所有类型，所有分类     
+                    $(".btn-search").trigger("click");
+                    $("tbody").on("click", ".art_delete", function (e) {
+                        e.preventDefault();
+                        var that = $(this);
+                        if (confirm("请问您确定要删除吗？")) {
+                            var id = $(this).attr("data-id")
+                            $.ajax({
+                                url: "http://localhost:8000/admin/article_delete",
+                                data: {
+                                    id: id
+                                },
+                                success: function (backData) {
+                                    if (backData.code == 200) {
+                                        that.parent().parent().remove();
+                                        window.location.reload()
+                                    }
+                                }
+                            })
+
+                        }
+
                     }
-                })
 
+                    )})
 
-            }
-
-               getData(1) ;
-               $('.pagination').twbsPagination({
-                totalPages: 25, //最大的页签数
-                visiblePages: 5, //可见的页签数
-                first: '首页',
-                last: '尾页',
-                prev: "上一页",
-                next: "下一页",
-                onPageClick: function (event, page) { //点击页签回调函数.
-                    //console.log(event);//点击时候触发的事件对象
-                    //console.log(page); //点击的页码
-                    //调用getData();
-                    getData(page);
-                }
-            });
-
-
-            })
-            //实现一进页面就显示所有类型，所有分类     
-            $(".btn-search").trigger("click");
-
-           
-        })
+                    
     </script>
 
 </body>
